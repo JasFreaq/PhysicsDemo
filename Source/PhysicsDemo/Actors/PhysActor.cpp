@@ -1,51 +1,56 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
-#include "PhysMeshComponent.h"
+#include "PhysActor.h"
 #include "PhysicsInterfaceDeclaresCore.h"
 #include <PxRigidActor.h>
 
-UPhysMeshComponent::UPhysMeshComponent()
+// Sets default values
+APhysActor::APhysActor()
 {
-	PrimaryComponentTick.bCanEverTick = true;
-	PrimaryComponentTick.bStartWithTickEnabled = true;
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
 
-	OnCalculateCustomPhysics.BindUObject(this, &UPhysMeshComponent::PhysicsTick);
+	OnCalculateCustomPhysics.BindUObject(this, &APhysActor::SubstepTick);
 }
 
-void UPhysMeshComponent::BeginPlay()
+// Called when the game starts or when spawned
+void APhysActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//OnCalculateCustomPhysics.BindUObject(this, &APhysActor::PhysicsTick);
+	
 	//Get the BodyInstance PxRigidbody
-	PhysicsActorHandle = &GetBodyInstance()->ActorHandle;
+	UPrimitiveComponent* Primitive = Cast<UPrimitiveComponent>(RootComponent);
+	BodyInst = Primitive->GetBodyInstance();
+	PhysicsActorHandle = &BodyInst->ActorHandle;
 }
 
-void UPhysMeshComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
+// Called every frame
+void APhysActor::Tick(float DeltaTime)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::Tick(DeltaTime);
 
-	if (SimulateCustomPhysics)
+	if (RootComponent->IsSimulatingPhysics())
 	{
-		GetBodyInstance()->AddCustomPhysics(OnCalculateCustomPhysics);
-		UE_LOG(LogTemp, Warning, TEXT("Set Physics Tick"));
+		BodyInst->AddCustomPhysics(OnCalculateCustomPhysics);
 	}
 }
 
-void UPhysMeshComponent::PhysicsTick(float DeltaTime, FBodyInstance* BodyInst)
+void APhysActor::SubstepTick(float DeltaTime, FBodyInstance* BodyInstance)
 {
 	FVector CurrentLocation = GetLocation();
 	FVector UpdatedLocation = CurrentLocation + CurrentLinearVelocity * DeltaTime;
 	SetLocation(UpdatedLocation);
 }
 
-void UPhysMeshComponent::ApplyLinearVelocity(FVector NewLinearVelocity)
+void APhysActor::ApplyLinearVelocity(FVector NewLinearVelocity)
 {
 	CurrentLinearVelocity = NewLinearVelocity;
 }
 
-void UPhysMeshComponent::SetLocation(FVector NewLocation)
+void APhysActor::SetLocation(FVector NewLocation)
 {
 	PxTransform PhysicsTransform = PhysicsActorHandle->SyncActor->getGlobalPose();
 	PxVec3 NewPhysicsLocation(NewLocation.X, NewLocation.Y, NewLocation.Z);
@@ -54,7 +59,7 @@ void UPhysMeshComponent::SetLocation(FVector NewLocation)
 	PhysicsActorHandle->SyncActor->setGlobalPose(PhysicsTransform);
 }
 
-void UPhysMeshComponent::SetRotation(FRotator NewRotation)
+void APhysActor::SetRotation(FRotator NewRotation)
 {
 	PxTransform PhysicsTransform = PhysicsActorHandle->SyncActor->getGlobalPose();
 	FQuat NewQuaternion = NewRotation.Quaternion();
@@ -64,25 +69,17 @@ void UPhysMeshComponent::SetRotation(FRotator NewRotation)
 	PhysicsActorHandle->SyncActor->setGlobalPose(PhysicsTransform);
 }
 
-FVector UPhysMeshComponent::GetLocation()
+FVector APhysActor::GetLocation()
 {
 	PxTransform PhysicsTransform = PhysicsActorHandle->SyncActor->getGlobalPose();
 	return FVector(PhysicsTransform.p.x, PhysicsTransform.p.y, PhysicsTransform.p.z);
 }
 
-FRotator UPhysMeshComponent::GetRotation()
+FRotator APhysActor::GetRotation()
 {
 	PxTransform PhysicsTransform = PhysicsActorHandle->SyncActor->getGlobalPose();
 	return FRotator(FQuat(PhysicsTransform.q.x, PhysicsTransform.q.y, PhysicsTransform.q.z, PhysicsTransform.q.w));
 }
 
-FVector UPhysMeshComponent::GetLinearVelocity()
-{
-	return FPhysicsInterface::GetLinearVelocity_AssumesLocked(*PhysicsActorHandle);
-}
 
-FVector UPhysMeshComponent::GetAngularVelocity()
-{
-	FVector PhysicsAngularVelocity = FPhysicsInterface::GetAngularVelocity_AssumesLocked(*PhysicsActorHandle);
-	return FMath::RadiansToDegrees(PhysicsAngularVelocity);
-}
+
