@@ -12,31 +12,29 @@ class PHYSICSDEMO_API USubstepPhysComponent : public USceneComponent
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
+public:
 	USubstepPhysComponent();
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	//Sub-step Tick Function
 	virtual void PhysicsTick(float DeltaTime, FBodyInstance* BodyInstance);
+
+	UFUNCTION(BlueprintCallable, Category = "Custom Physics")
+		void ApplyForce(FVector Force);
 	
 private:
+	UPrimitiveComponent* PrimitiveParent;	
+	FBodyInstance* BodyInst;
 	FCalculateCustomPhysics OnCalculateCustomPhysics;
 
-	UPrimitiveComponent* PrimitiveParent;
-	
-	FBodyInstance* BodyInst;
-
 	FVector CurrentLinearVelocity = FVector::ZeroVector;
-
-	void ApplyLinearVelocity(FVector NewLinearVelocity);
+	FVector CurrentLinearAcceleration = FVector::ZeroVector;
+	FVector CurrentResultantForce = FVector::ZeroVector;
 
 	void SetLocation(FVector NewLocation);
 

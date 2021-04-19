@@ -41,14 +41,20 @@ void USubstepPhysComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void USubstepPhysComponent::PhysicsTick(float DeltaTime, FBodyInstance* BodyInstance)
 {
-	FVector CurrentLocation = GetLocation();
-	FVector UpdatedLocation = CurrentLocation + CurrentLinearVelocity * DeltaTime;
-	SetLocation(UpdatedLocation);
+	//Update Acceleration
+	CurrentLinearAcceleration = CurrentResultantForce / BodyInstance->GetBodyMass();
+
+	//Update Velocity
+	CurrentLinearVelocity += CurrentLinearAcceleration * DeltaTime;
+
+	//Update Location
+	FVector NewLocation = GetLocation() + CurrentLinearVelocity * 100 * DeltaTime;
+	SetLocation(NewLocation);
 }
 
-void USubstepPhysComponent::ApplyLinearVelocity(FVector NewLinearVelocity)
+void USubstepPhysComponent::ApplyForce(FVector Force)
 {
-	CurrentLinearVelocity = NewLinearVelocity;
+	CurrentResultantForce += Force;
 }
 
 void USubstepPhysComponent::SetLocation(FVector NewLocation)
