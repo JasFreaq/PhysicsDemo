@@ -3,50 +3,48 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/MeshComponent.h"
-#include "PhysMeshComponent.generated.h"
+#include "Components/SceneComponent.h"
+#include "SubstepPhysComponent.generated.h"
 
-/**
- * 
- */
-UCLASS()
-class PHYSICSDEMO_API UPhysMeshComponent : public UMeshComponent
+
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+class PHYSICSDEMO_API USubstepPhysComponent : public USceneComponent
 {
 	GENERATED_BODY()
 
-public:
-	UPhysMeshComponent();
+public:	
+	// Sets default values for this component's properties
+	USubstepPhysComponent();
 
+protected:
+	// Called when the game starts
 	virtual void BeginPlay() override;
 
+public:	
+	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	//Sub-step Tick Function
 	virtual void PhysicsTick(float DeltaTime, FBodyInstance* BodyInstance);
-
-	UFUNCTION(BlueprintCallable, Category = "Custom Physics")
-		void ApplyLinearVelocity(FVector NewLinearVelocity);
 	
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
-		bool SimulateCustomPhysics = false;
-	
 	FCalculateCustomPhysics OnCalculateCustomPhysics;
 
-	//Rigidbody Cache
-	const FPhysicsActorHandle* PhysicsActorHandle;
+	UPrimitiveComponent* PrimitiveParent;
+	
+	FBodyInstance* BodyInst;
 
 	FVector CurrentLinearVelocity = FVector::ZeroVector;
-	
+
+	void ApplyLinearVelocity(FVector NewLinearVelocity);
+
 	void SetLocation(FVector NewLocation);
 
 	void SetRotation(FRotator NewRotation);
+
+	FORCEINLINE FTransform GetTransform();
 	
 	FORCEINLINE FVector GetLocation();
 
 	FORCEINLINE FRotator GetRotation();
-
-	FORCEINLINE FVector GetLinearVelocity();
-
-	FORCEINLINE FVector GetAngularVelocity();
 };
