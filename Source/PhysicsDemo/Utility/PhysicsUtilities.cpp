@@ -39,9 +39,8 @@ FTransform PhysicsUtilities::GetSubstepComponentWorldTransform(const USceneCompo
 				const auto RootBoneName = SkelMeshComponent->GetBoneName(0);
 				const auto BodyInstanceRefPosition = GetBoneRefTransformInComponentSpace(SkelMeshComponent, RootBoneName);
 				return BodyInstanceRefPosition.Inverse() * ParentBodyInstance->GetUnrealWorldTransform();
-			}
+			}			
 		}
-
 
 		return ParentBodyInstance->GetUnrealWorldTransform();
 	}();

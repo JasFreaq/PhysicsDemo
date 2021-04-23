@@ -6,6 +6,11 @@
 #include "Components/SceneComponent.h"
 #include "SubstepPhysComponent.generated.h"
 
+#define UNIVERSAL_GRAVITATIONAL_CONSTANT 6.67408e-11f
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPhysicsTickSignature, float, DeltaTime);
+
+class UPhysicsGameInstance;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PHYSICSDEMO_API USubstepPhysComponent : public USceneComponent
@@ -26,23 +31,44 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Custom Physics")
 		void ApplyForce(FVector Force);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics")
+		FORCEINLINE float GetPhysicsMass();
 	
-private:
-	UPrimitiveComponent* PrimitiveParent;	
-	FBodyInstance* BodyInst;
+protected:
+	UPROPERTY(BlueprintAssignable, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
+		FPhysicsTickSignature OnPhysicsTick;
+
+	UPROPERTY()
+		UPrimitiveComponent* PrimitiveParent = nullptr;
+	
+	FBodyInstance* BodyInst = nullptr;
+
+	UFUNCTION(BlueprintCallable, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
+		void SetPhysicsLocation(FVector NewLocation);
+
+	UFUNCTION(BlueprintCallable, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
+		void SetPhysicsRotation(FRotator NewRotation);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
+		FORCEINLINE FTransform GetPhysicsTransform();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
+		FORCEINLINE FVector GetPhysicsLocation();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
+		FORCEINLINE FRotator GetPhysicsRotation();
+	
+private:		
 	FCalculateCustomPhysics OnCalculateCustomPhysics;
 
 	FVector CurrentLinearVelocity = FVector::ZeroVector;
 	FVector CurrentLinearAcceleration = FVector::ZeroVector;
 	FVector CurrentResultantForce = FVector::ZeroVector;
 
-	void SetLocation(FVector NewLocation);
-
-	void SetRotation(FRotator NewRotation);
-
-	FORCEINLINE FTransform GetTransform();
+	UPhysicsGameInstance* PhysicsGameInstance = nullptr;
+	/*static TArray<USubstepPhysComponent*> PhysicsBodies;
+	static int32 GravityCounter;*/
 	
-	FORCEINLINE FVector GetLocation();
-
-	FORCEINLINE FRotator GetRotation();
+	void ApplyGravity();
 };
