@@ -14,24 +14,19 @@ class PHYSICSDEMO_API URocketEngineComponent : public USubstepPhysComponent
 	GENERATED_BODY()
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom Physics", meta = (AllowPrivateAccess = true, Tooltip = "in kg."))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom Physics", meta = (AllowPrivateAccess = true, Tooltip = "in kg."))
 		float FuelMass = 1000.f; //in kg
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom Physics", meta = (AllowPrivateAccess = true, Tooltip = "in kN."))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom Physics", meta = (AllowPrivateAccess = true, Tooltip = "in kN."))
 		float MaxThrust = 2278.f; //in kN
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom Physics", meta = (AllowPrivateAccess = true, ClampMin = 0.f, ClampMax = 1.f))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom Physics", meta = (AllowPrivateAccess = true, ClampMin = 0.f, ClampMax = 1.f))
 		float ThrustPercent = 0.5f;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom Physics", meta = (AllowPrivateAccess = true, ClampMin = 0.f, ClampMax = 1.f))
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom Physics", meta = (AllowPrivateAccess = true, ClampMin = 0.f, ClampMax = 1.f))
 		FVector ThrustUnitVector = FVector::UpVector;
 		
 	UFUNCTION()

@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/GameInstance.h"
-#include "PhysicsGameInstance.generated.h"
+#include "GameFramework/GameModeBase.h"
+#include "PhysicsGameMode.generated.h"
 
 class USubstepPhysComponent;
 
@@ -12,7 +12,7 @@ class USubstepPhysComponent;
  * 
  */
 UCLASS()
-class PHYSICSDEMO_API UPhysicsGameInstance : public UGameInstance
+class PHYSICSDEMO_API APhysicsGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 

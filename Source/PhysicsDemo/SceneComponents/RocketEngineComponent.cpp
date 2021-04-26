@@ -16,15 +16,6 @@ void URocketEngineComponent::BeginPlay()
 		ThrustUnitVector.Normalize();
 }
 
-
-// Called every frame
-void URocketEngineComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	
-}
-
 void URocketEngineComponent::GenerateThrust(float DeltaTime)
 {
 	float FuelRequired = FuelRequiredThisSubstep(DeltaTime);
@@ -35,10 +26,6 @@ void URocketEngineComponent::GenerateThrust(float DeltaTime)
 
 		float CurrentThrust = MaxThrust * ThrustPercent * 1000.f;		
 		ApplyForce(ThrustUnitVector * CurrentThrust);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Display, TEXT("Fuel finished."));
 	}
 }
 

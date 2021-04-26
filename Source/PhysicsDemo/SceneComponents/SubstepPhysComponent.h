@@ -7,10 +7,12 @@
 #include "SubstepPhysComponent.generated.h"
 
 #define UNIVERSAL_GRAVITATIONAL_CONSTANT 6.67408e-11f
+#define EARTH_MASS 5.972e24f
+#define EARTH_RADIUS 637800000 //6978 kms
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPhysicsTickSignature, float, DeltaTime);
 
-class UPhysicsGameInstance;
+class APhysicsGameMode;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PHYSICSDEMO_API USubstepPhysComponent : public USceneComponent
@@ -59,16 +61,17 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
 		FORCEINLINE FRotator GetPhysicsRotation();
 	
-private:		
+private:
+	UPROPERTY(EditAnywhere, Category = "Custom Physics")
+		bool bSimulateEarthGravity = false;
+	
 	FCalculateCustomPhysics OnCalculateCustomPhysics;
 
 	FVector CurrentLinearVelocity = FVector::ZeroVector;
 	FVector CurrentLinearAcceleration = FVector::ZeroVector;
 	FVector CurrentResultantForce = FVector::ZeroVector;
 
-	UPhysicsGameInstance* PhysicsGameInstance = nullptr;
-	/*static TArray<USubstepPhysComponent*> PhysicsBodies;
-	static int32 GravityCounter;*/
+	APhysicsGameMode* PhysicsGameMode = nullptr;
 	
 	void ApplyGravity();
 };
