@@ -5,9 +5,6 @@
 #include "PhysicsDemo/Utility/PhysicsUtilities.h"
 #include "SubstepPhysComponent.h"
 
-//TArray<USubstepPhysComponent*> USubstepPhysComponent::PhysicsBodies;
-//int32 USubstepPhysComponent::GravityCounter = 0;
-
 USubstepPhysComponent::USubstepPhysComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -15,7 +12,6 @@ USubstepPhysComponent::USubstepPhysComponent()
 
 	OnCalculateCustomPhysics.BindUObject(this, &USubstepPhysComponent::PhysicsTick);
 }
-
 
 // Called when the game starts
 void USubstepPhysComponent::BeginPlay()
@@ -33,8 +29,9 @@ void USubstepPhysComponent::BeginPlay()
 			BodyInst = PrimitiveParent->GetBodyInstance(GetAttachSocketName());
 		}
 	}
-}
 
+	SetRelativeLocation(FVector::ZeroVector);
+}
 
 // Called every frame
 void USubstepPhysComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -50,6 +47,7 @@ void USubstepPhysComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 void USubstepPhysComponent::PhysicsTick(float DeltaTime, FBodyInstance* BodyInstance)
 {
 	ApplyGravity();
+	ApplyDrag(CurrentLinearVelocity);
 	
 	//Update Acceleration
 	CurrentLinearAcceleration = CurrentResultantForce / BodyInstance->GetBodyMass();
@@ -60,7 +58,7 @@ void USubstepPhysComponent::PhysicsTick(float DeltaTime, FBodyInstance* BodyInst
 	//Update Location
 	FVector NewLocation = GetPhysicsLocation() + CurrentLinearVelocity * 100 * DeltaTime;
 	SetPhysicsLocation(NewLocation);
-
+	
 	//Reset Forces
 	CurrentResultantForce = FVector::ZeroVector;
 
@@ -110,39 +108,7 @@ FRotator USubstepPhysComponent::GetPhysicsRotation()
 
 void USubstepPhysComponent::ApplyGravity()
 {
-	if (PhysicsGameMode->PhysicsBodies.Num() > 1)
-	{
-		if (PhysicsGameMode->GravityCounter == 0)
-		{
-			for (int32 i = 0, n = PhysicsGameMode->PhysicsBodies.Num(); i < n - 1; i++)
-			{
-				USubstepPhysComponent* BodyA = PhysicsGameMode->PhysicsBodies[i];
-
-				for (int32 j = i + 1; j < n; j++)
-				{
-					USubstepPhysComponent* BodyB = PhysicsGameMode->PhysicsBodies[j];
-
-					FVector DirectionAToB = BodyB->GetPhysicsLocation() - BodyA->GetPhysicsLocation();
-					float Distance = DirectionAToB.Size() / 100.f;
-
-					DirectionAToB.Normalize();
-					float DistanceSquared = FMath::Square(Distance);
-
-					float ForceMagnitude = (UNIVERSAL_GRAVITATIONAL_CONSTANT * BodyA->GetPhysicsMass() * BodyB->GetPhysicsMass()) / DistanceSquared;
-
-					BodyA->ApplyForce(DirectionAToB * ForceMagnitude);
-					BodyB->ApplyForce(-DirectionAToB * ForceMagnitude);
-				}
-			}
-		}
-
-		PhysicsGameMode->GravityCounter++;
-
-		if (PhysicsGameMode->GravityCounter == PhysicsGameMode->PhysicsBodies.Num())
-		{
-			PhysicsGameMode->GravityCounter = 0;
-		}
-	}
+	PhysicsGameMode->ApplyGravity();
 
 	if (bSimulateEarthGravity)
 	{
@@ -151,7 +117,16 @@ void USubstepPhysComponent::ApplyGravity()
 
 		float ForceMagnitude = (UNIVERSAL_GRAVITATIONAL_CONSTANT * EARTH_MASS * GetPhysicsMass()) / DistanceSquared;
 		ApplyForce(FVector::DownVector * ForceMagnitude);
-		UE_LOG(LogTemp, Warning, TEXT("Force: %f"), ForceMagnitude);
 	}
 }
 
+void USubstepPhysComponent::ApplyDrag(FVector Velocity)
+{
+	if (bSimulateLinearDrag)
+	{
+		float SpeedTerm = FMath::Pow(Velocity.Size(), DragVelocityExponent);
+		Velocity.Normalize();
+
+		ApplyForce(-Velocity * SpeedTerm * DragConstant);
+	}
+}

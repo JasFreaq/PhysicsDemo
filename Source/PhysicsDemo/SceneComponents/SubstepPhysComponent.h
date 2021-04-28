@@ -6,7 +6,6 @@
 #include "Components/SceneComponent.h"
 #include "SubstepPhysComponent.generated.h"
 
-#define UNIVERSAL_GRAVITATIONAL_CONSTANT 6.67408e-11f
 #define EARTH_MASS 5.972e24f
 #define EARTH_RADIUS 637800000 //6978 kms
 
@@ -37,10 +36,20 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics")
 		FORCEINLINE float GetPhysicsMass();
 	
-protected:
 	UPROPERTY(BlueprintAssignable, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
 		FPhysicsTickSignature OnPhysicsTick;
 
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
+		FORCEINLINE FTransform GetPhysicsTransform();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
+		FORCEINLINE FVector GetPhysicsLocation();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
+		FORCEINLINE FRotator GetPhysicsRotation();
+
+protected:
 	UPROPERTY()
 		UPrimitiveComponent* PrimitiveParent = nullptr;
 	
@@ -51,19 +60,19 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
 		void SetPhysicsRotation(FRotator NewRotation);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
-		FORCEINLINE FTransform GetPhysicsTransform();
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
-		FORCEINLINE FVector GetPhysicsLocation();
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
-		FORCEINLINE FRotator GetPhysicsRotation();
 	
 private:
-	UPROPERTY(EditAnywhere, Category = "Custom Physics")
+	UPROPERTY(EditAnywhere, AdvancedDisplay, Category = "Custom Physics")
 		bool bSimulateEarthGravity = false;
+
+	UPROPERTY(EditAnywhere, AdvancedDisplay, Category = "Custom Physics")
+		bool bSimulateLinearDrag = false;
+
+	UPROPERTY(EditAnywhere, AdvancedDisplay, Category = "Custom Physics", meta = (ClampMin = 1.f, ClampMax = 2.f, EditCondition = bSimulateLinearDrag))
+		float DragVelocityExponent = 1.5f;
+
+	UPROPERTY(EditAnywhere, AdvancedDisplay, Category = "Custom Physics", meta = (EditCondition = bSimulateLinearDrag))
+		float DragConstant = 1.f;
 	
 	FCalculateCustomPhysics OnCalculateCustomPhysics;
 
@@ -74,4 +83,6 @@ private:
 	APhysicsGameMode* PhysicsGameMode = nullptr;
 	
 	void ApplyGravity();
+
+	void ApplyDrag(FVector Velocity);
 };

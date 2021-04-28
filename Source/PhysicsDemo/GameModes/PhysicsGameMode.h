@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "PhysicsGameMode.generated.h"
 
+#define UNIVERSAL_GRAVITATIONAL_CONSTANT 6.67408e-11f
+
 class USubstepPhysComponent;
 
 /**
@@ -17,6 +19,8 @@ class PHYSICSDEMO_API APhysicsGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 private:
+	void ApplyGravity();
+	
 	TArray<USubstepPhysComponent*> PhysicsBodies;
 	int32 GravityCounter = 0;
 
