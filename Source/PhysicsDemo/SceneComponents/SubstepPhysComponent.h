@@ -26,7 +26,7 @@ protected:
 
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	
 	//Sub-step Tick Function
 	virtual void PhysicsTick(float DeltaTime, FBodyInstance* BodyInstance);
 
@@ -38,8 +38,7 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
 		FPhysicsTickSignature OnPhysicsTick;
-
-
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Custom Physics", meta = (AllowPrivateAccess = true))
 		FORCEINLINE FTransform GetPhysicsTransform();
 
@@ -81,8 +80,10 @@ private:
 	FVector CurrentResultantForce = FVector::ZeroVector;
 
 	APhysicsGameMode* PhysicsGameMode = nullptr;
+
+	void UpdateTranslationalMotion(float DeltaTime);
 	
 	void ApplyGravity();
 
-	void ApplyDrag(FVector Velocity);
+	void ApplyLinearDrag(FVector Velocity);
 };

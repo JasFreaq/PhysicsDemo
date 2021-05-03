@@ -44,13 +44,13 @@ void USubstepPhysComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	}
 }
 
-void USubstepPhysComponent::PhysicsTick(float DeltaTime, FBodyInstance* BodyInstance)
+void USubstepPhysComponent::UpdateTranslationalMotion(float DeltaTime)
 {
 	ApplyGravity();
-	ApplyDrag(CurrentLinearVelocity);
+	ApplyLinearDrag(CurrentLinearVelocity);
 	
 	//Update Acceleration
-	CurrentLinearAcceleration = CurrentResultantForce / BodyInstance->GetBodyMass();
+	CurrentLinearAcceleration = CurrentResultantForce / BodyInst->GetBodyMass();
 
 	//Update Velocity
 	CurrentLinearVelocity += CurrentLinearAcceleration * DeltaTime;
@@ -61,6 +61,11 @@ void USubstepPhysComponent::PhysicsTick(float DeltaTime, FBodyInstance* BodyInst
 	
 	//Reset Forces
 	CurrentResultantForce = FVector::ZeroVector;
+}
+
+void USubstepPhysComponent::PhysicsTick(float DeltaTime, FBodyInstance* BodyInstance)
+{
+	UpdateTranslationalMotion(DeltaTime);
 
 	OnPhysicsTick.Broadcast(DeltaTime);
 }
@@ -120,7 +125,7 @@ void USubstepPhysComponent::ApplyGravity()
 	}
 }
 
-void USubstepPhysComponent::ApplyDrag(FVector Velocity)
+void USubstepPhysComponent::ApplyLinearDrag(FVector Velocity)
 {
 	if (bSimulateLinearDrag)
 	{
